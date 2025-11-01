@@ -25,12 +25,3 @@ class GraphBuilder:
         if usecase=="topic":
              self.build_topic_graph()
         return self.graph.compile()
-             
-
-
-
-
-
-
-
-
