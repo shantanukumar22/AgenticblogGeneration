@@ -55,6 +55,7 @@
 
 //   return (
 //     <div className="min-h-screen bg-white">
+//       {/* Header/Input Section */}
 //       <div className="bg-white border-b border-gray-200">
 //         <div className="max-w-4xl mx-auto px-6 py-16">
 //           <h1 className="text-5xl font-bold mb-4 text-gray-900">
@@ -95,6 +96,7 @@
 //         </div>
 //       </div>
 
+//       {/* Blog Content Section */}
 //       <div className="max-w-3xl mx-auto px-6 py-12">
 //         {loading && (
 //           <div className="flex items-center justify-center py-20">
@@ -108,10 +110,12 @@
 //         <div className="space-y-16">
 //           {blogs.map((blog, index) => (
 //             <article key={index} className="blog-post-container">
+//               {/* Blog Title - Clean without markdown */}
 //               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 leading-tight">
 //                 {cleanTitle(blog.title || blog.topic)}
 //               </h1>
 
+//               {/* Meta Info */}
 //               <div className="flex items-center gap-4 mb-8 pb-8 border-b border-gray-200">
 //                 <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold text-lg">
 //                   AI
@@ -129,6 +133,7 @@
 //                 </div>
 //               </div>
 
+//               {/* Blog Content with Medium-style prose */}
 //               <div className="medium-prose">
 //                 <ReactMarkdown
 //                   remarkPlugins={[remarkGfm]}
@@ -229,6 +234,7 @@
 //                 </ReactMarkdown>
 //               </div>
 
+//               {/* Footer */}
 //               <div className="mt-12 pt-8 border-t border-gray-200">
 //                 <div className="flex gap-4">
 //                   <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors">
@@ -246,6 +252,7 @@
 //           ))}
 //         </div>
 
+//         {/* Empty State */}
 //         {blogs.length === 0 && !loading && (
 //           <div className="text-center py-20">
 //             <div className="text-6xl mb-4">✍️</div>
@@ -265,40 +272,118 @@
 
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAuthStore } from "@/lib/store/authStore";
 
 export default function Blogspage() {
+  const router = useRouter();
+  const { token, isAuthenticated, user } = useAuthStore();
+
   const [topic, setTopic] = useState("");
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [savedBlogId, setSavedBlogId] = useState(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const fetchBlogs = async () => {
     if (!topic.trim()) {
       setError("Please enter a topic before generating.");
       return;
     }
+
     setLoading(true);
     setError(null);
-    console.log("Sending topic:", topic);
-    try {
-      const response = await fetch("http://localhost:8000/blogs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ topic: topic }),
-      });
-      if (!response.ok) throw new Error("Failed to fetch blogs");
-      const data = await response.json();
-      console.log("Response:", data);
+    setSavedBlogId(null);
+    setShowSaveSuccess(false);
 
-      const blogData = data.data?.blog || data.blog || data;
-      if (blogData) {
-        setBlogs(Array.isArray(blogData) ? blogData : [blogData]);
+    try {
+      // If user is authenticated, use the API endpoint that saves automatically
+      if (isAuthenticated()) {
+        const response = await fetch("http://localhost:8000/api/blogs", {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ topic }),
+        });
+
+        if (response.status === 401) {
+          setError("Session expired. Please login again.");
+          useAuthStore.getState().logout();
+          router.push("/login");
+          return;
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
+
+        const savedBlog = await response.json();
+
+        // Check if content is JSON or string
+        // Parse nested content safely
+        let blogContent;
+        try {
+          const parsed =
+            typeof savedBlog.content === "string"
+              ? JSON.parse(savedBlog.content)
+              : savedBlog.content;
+
+          // Handle nested structure: { topic, blog: { title, content } }
+          if (parsed.blog) {
+            blogContent = {
+              title: parsed.blog.title || savedBlog.title,
+              content: parsed.blog.content || "",
+            };
+          } else {
+            blogContent = {
+              title: parsed.title || savedBlog.title,
+              content: parsed.content || "",
+            };
+          }
+        } catch (e) {
+          console.error("Failed to parse blog content:", e);
+          blogContent = {
+            title: savedBlog.title,
+            content:
+              typeof savedBlog.content === "string" ? savedBlog.content : "",
+          };
+        }
+
+        setSavedBlogId(savedBlog.id);
+        setBlogs([blogContent]);
+        setShowSaveSuccess(true);
+
+        // Hide success message after 5 seconds
+        setTimeout(() => setShowSaveSuccess(false), 5000);
       } else {
-        setError("No blog data found in response.");
+        // Use legacy endpoint for non-authenticated users (preview only)
+        const response = await fetch("http://localhost:8000/blogs", {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ topic: topic }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch blogs");
+
+        const data = await response.json();
+        const blogData = data.data?.blog || data.blog || data.data;
+
+        if (blogData) {
+          setBlogs(Array.isArray(blogData) ? blogData : [blogData]);
+        } else {
+          setError("No blog data found in response.");
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -311,10 +396,10 @@ export default function Blogspage() {
   const cleanTitle = (title) => {
     if (!title) return "";
     return title
-      .replace(/#+\s*/g, "") // Remove # symbols
-      .replace(/\*\*/g, "") // Remove ** bold markers
-      .replace(/\*/g, "") // Remove * italic markers
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1") // Remove links but keep text
+      .replace(/#+\s*/g, "")
+      .replace(/\*\*/g, "")
+      .replace(/\*/g, "")
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
       .trim();
   };
 
@@ -322,13 +407,112 @@ export default function Blogspage() {
     <div className="min-h-screen bg-white">
       {/* Header/Input Section */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-16">
-          <h1 className="text-5xl font-bold mb-4 text-gray-900">
-            AI Blog Generator
-          </h1>
-          <p className="text-gray-600 mb-10 text-lg">
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          {/* Top Navigation */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              AI Blog Generator
+            </h1>
+            <div className="flex items-center gap-3">
+              {isAuthenticated() ? (
+                <>
+                  <div className="text-sm text-gray-600">
+                    Welcome,{" "}
+                    <span className="font-medium">{user?.username}</span>
+                  </div>
+                  <button
+                    onClick={() => router.push("/dashboard/blogs")}
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    My Blogs
+                  </button>
+                  <button
+                    onClick={() => {
+                      useAuthStore.getState().logout();
+                      router.push("/login");
+                    }}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => router.push("/register")}
+                    className="px-4 py-2 bg-gray-900 text-white hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <p className="text-gray-600 mb-8 text-lg">
             Generate professional blog posts on any topic in seconds
           </p>
+
+          {/* Login Notice for Non-authenticated Users */}
+          {!isAuthenticated() && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-blue-800 text-sm">
+                💡 <strong>Tip:</strong>{" "}
+                <button
+                  onClick={() => router.push("/login")}
+                  className="underline font-medium hover:text-blue-900"
+                >
+                  Login
+                </button>{" "}
+                or{" "}
+                <button
+                  onClick={() => router.push("/register")}
+                  className="underline font-medium hover:text-blue-900"
+                >
+                  Sign up
+                </button>{" "}
+                to automatically save your generated blogs!
+              </p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {showSaveSuccess && savedBlogId && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="h-6 w-6 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span className="text-green-800 font-medium">
+                    Blog saved successfully!
+                  </span>
+                </div>
+                <button
+                  onClick={() => router.push("/dashboard/blogs")}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+                >
+                  View All Blogs
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="max-w-2xl">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -367,7 +551,10 @@ export default function Blogspage() {
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
-              <p className="text-gray-600">Crafting your blog post...</p>
+              <p className="text-gray-600">
+                Crafting your blog post
+                {isAuthenticated() ? " and saving it" : ""}...
+              </p>
             </div>
           </div>
         )}
@@ -375,6 +562,28 @@ export default function Blogspage() {
         <div className="space-y-16">
           {blogs.map((blog, index) => (
             <article key={index} className="blog-post-container">
+              {/* Saved Badge */}
+              {savedBlogId && (
+                <div className="mb-4">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Saved to your account
+                  </span>
+                </div>
+              )}
+
               {/* Blog Title - Clean without markdown */}
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 leading-tight">
                 {cleanTitle(blog.title || blog.topic)}
@@ -508,9 +717,25 @@ export default function Blogspage() {
                   <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors">
                     💬 Comment
                   </button>
-                  <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors">
-                    🔖 Save
-                  </button>
+                  {savedBlogId ? (
+                    <button
+                      onClick={() => router.push("/dashboard/blogs")}
+                      className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-full text-sm font-medium transition-colors"
+                    >
+                      ✅ Saved
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (!isAuthenticated()) {
+                          router.push("/login");
+                        }
+                      }}
+                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors"
+                    >
+                      🔖 {isAuthenticated() ? "Already Saved" : "Login to Save"}
+                    </button>
+                  )}
                 </div>
               </div>
             </article>
