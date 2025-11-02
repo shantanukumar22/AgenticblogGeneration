@@ -87,8 +87,8 @@ export default function MyBlogsPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto py-6 sm:py-8">
           {/* Header */}
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -98,7 +98,7 @@ export default function MyBlogsPage() {
 
           {/* Blogs Grid */}
           {blogs.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-lg shadow">
+            <div className="text-center py-12 sm:py-20 px-6 sm:px-8 bg-white rounded-lg shadow">
               <div className="text-6xl mb-4">📝</div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 No blogs yet
@@ -108,20 +108,20 @@ export default function MyBlogsPage() {
               </p>
               <button
                 onClick={() => router.push("/")}
-                className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium"
+                className="px-5 sm:px-6 py-3 text-sm sm:text-base bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-all"
               >
                 Create Your First Blog
               </button>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {blogs.map((blog) => (
                 <div
                   key={blog.id}
-                  className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6"
+                  className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-5 sm:p-6"
                 >
                   <div className="mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2">
                       {blog.title || blog.topic}
                     </h3>
                     <p className="text-sm text-gray-600">
@@ -129,8 +129,8 @@ export default function MyBlogsPage() {
                     </p>
                   </div>
 
-                  <div className="text-gray-700 text-sm mb-4 line-clamp-3">
-                    <div className="text-gray-700 text-sm mb-4 line-clamp-3">
+                  <div className="text-gray-700 text-xs sm:text-sm mb-4 line-clamp-3">
+                    <div className="text-gray-700 text-xs sm:text-sm mb-4 line-clamp-3">
                       {(() => {
                         try {
                           const parsed =
@@ -149,16 +149,16 @@ export default function MyBlogsPage() {
                     </div>{" "}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
                       onClick={() => router.push(`/dashboard/blogs/${blog.id}`)}
-                      className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                      className="flex-1 w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all"
                     >
                       View
                     </button>
                     <button
                       onClick={() => handleDelete(blog.id)}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
                     >
                       Delete
                     </button>

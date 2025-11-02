@@ -43,7 +43,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg flex items-center justify-center">
               <span className="text-white text-sm font-bold">AI</span>
             </div>
-            <span>Blog Generator</span>
+            <span>AI'm Writting</span>
           </Link>
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function LoginPage() {
           </div>
 
           {/* Additional Info */}
-          <div className="mt-10 text-center">
+          {/* <div className="mt-10 text-center">
             <p className="text-sm text-gray-500">
               Click "Sign in" to agree to AI Blog Generator's{" "}
               <a href="#" className="underline hover:text-gray-700">
@@ -193,12 +193,12 @@ export default function LoginPage() {
               </a>{" "}
               applies to you.
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-6">
+      {/* <footer className="border-t border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
             <a href="#" className="hover:text-gray-900 transition-colors">
@@ -215,7 +215,7 @@ export default function LoginPage() {
             </a>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

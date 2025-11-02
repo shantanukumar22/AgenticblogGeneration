@@ -47,7 +47,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col  ">
       {/* Header */}
       <div className="border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -58,18 +58,18 @@ export default function RegisterPage() {
             <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg flex items-center justify-center">
               <span className="text-white text-sm font-bold">AI</span>
             </div>
-            <span>Blog Generator</span>
+            <span>AI'm Writting</span>
           </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 ">
         <div className="w-full max-w-md">
           {/* Welcome Section */}
           <div className="text-center mb-10">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Join AI Blog Generator.
+              Join AI'm Writting.
             </h1>
             <p className="text-lg text-gray-600">
               Start creating amazing content with the power of AI.
@@ -77,7 +77,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Register Form */}
-          <div className="bg-white">
+          <div className="bg-white ">
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
                 <div className="bg-red-50 border-l-4 border-red-500 p-4">
@@ -237,9 +237,9 @@ export default function RegisterPage() {
           </div>
 
           {/* Additional Info */}
-          <div className="mt-10 text-center">
+          {/* <div className="mt-10 text-center">
             <p className="text-sm text-gray-500">
-              Click "Create account" to agree to AI Blog Generator's{" "}
+              Click "Create account" to agree to AI'm Writting{" "}
               <a href="#" className="underline hover:text-gray-700">
                 Terms of Service
               </a>{" "}
@@ -249,12 +249,12 @@ export default function RegisterPage() {
               </a>{" "}
               applies to you.
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-6">
+      {/* <footer className="border-t border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
             <a href="#" className="hover:text-gray-900 transition-colors">
@@ -271,7 +271,7 @@ export default function RegisterPage() {
             </a>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }
