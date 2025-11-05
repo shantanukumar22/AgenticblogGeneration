@@ -1,18 +1,18 @@
 from app import app
-from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient
+from fastapi.responses import Response
 
 client = TestClient(app)
 
 def handler(request, context):
-    """
-    Vercel calls this function for each incoming request.
-    We forward the request to FastAPI using TestClient.
-    """
+    method = request.method
     path = request.path_params.get("path", "")
-    method = request.method.lower()
-    data = request.body
-    headers = dict(request.headers)
+    body = request.body or None
+    headers = dict(request.headers or {})
 
-    response = client.request(method, f"/{path}", data=data, headers=headers)
-    return JSONResponse(content=response.json(), status_code=response.status_code)
+    r = client.request(method, f"/{path}", data=body, headers=headers)
+    return Response(
+        content=r.content,
+        status_code=r.status_code,
+        media_type=r.headers.get("content-type", "application/json"),
+    )
