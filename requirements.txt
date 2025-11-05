@@ -1,8 +1,10 @@
-langchain
-langchain_core
-langchain_community
-langchain_groq
-langgraph
+fastapi
 uvicorn
-watchdog
-langchain-cli[inmem]
+requests
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langgraph
+python-dotenv
+sqlalchemy
