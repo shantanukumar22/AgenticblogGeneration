@@ -1,11 +1,29 @@
+# --- Core Web Framework ---
 fastapi
+uvicorn
+
+# --- HTTP & Utils ---
 requests
+python-dotenv
+
+# --- Database ---
+sqlalchemy
+psycopg2-binary  # PostgreSQL driver (required for Railway)
+
+# --- Auth & Security (optional but commonly used) ---
+passlib[bcrypt]
+pydantic
+
+# --- AI & LangChain Ecosystem ---
 langchain
 langchain-core
 langchain-community
 langchain-groq
 langgraph
+<<<<<<< HEAD
 python-dotenv
 sqlalchemy
 uvicorn
 psycopg2-binary==2.9.9
+=======
+>>>>>>> e60ba5fa79bed87043db849a291a40c2b6f9749a
