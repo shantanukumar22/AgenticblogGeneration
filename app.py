@@ -315,5 +315,14 @@ async def create_blogs_legacy(request: Request):
     
     return {"data": state}
 
+
+def main():
+    print("Hello from blogagentic!")
+    import os
+    import uvicorn
+    port = int(os.environ.get("PORT", 8080))
+    print(f"🚀 Starting server on port {port}...")
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
+
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8080)
+    main()
