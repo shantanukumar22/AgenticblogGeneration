@@ -1,9 +1,10 @@
 fastapi
 uvicorn
 requests
+python-jose[cryptography]
 python-dotenv
 sqlalchemy
-psycopg2-binary
+psycopg2-binary==2.9.9
 passlib[bcrypt]
 pydantic
 langchain
@@ -11,7 +12,3 @@ langchain-core
 langchain-community
 langchain-groq
 langgraph
-python-dotenv
-sqlalchemy
-uvicorn
-psycopg2-binary==2.9.9
