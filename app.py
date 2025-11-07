@@ -1,5 +1,3 @@
-
-
 import uvicorn
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -81,6 +79,9 @@ async def startup_event():
         print("✅ Database initialized successfully")
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 # ==================== AUTH ENDPOINTS ====================
 
@@ -315,4 +316,4 @@ async def create_blogs_legacy(request: Request):
     return {"data": state}
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8080)
