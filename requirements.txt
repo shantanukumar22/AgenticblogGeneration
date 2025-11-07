@@ -12,3 +12,4 @@ langchain-core
 langchain-community
 langchain-groq
 langgraph
+email-validator
